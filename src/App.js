@@ -50,15 +50,73 @@ function Article(props) {
         </article>
     );
 }
+function CreateForm(props) {
+    return (
+        <article>
+            <h2>Create</h2>
+            <form
+                onSubmit={(e) => {
+                    const title = e.target.title.value;
+                    const body = e.target.body.value;
+                    e.preventDefault();
+                    props.onCreate(title, body);
+                }}
+            >
+                <input type="text" name="title" placeholder="title" />
+                <br />
+                <textarea name="body" placeholder="body" />
+                <br />
+                <input type="submit" value="Create" />
+            </form>
+        </article>
+    );
+}
+function UpdateForm(props) {
+    const [title, setTitle] = useState(props.title);
+    const [body, setBody] = useState(props.body);
+    return (
+        <article>
+            <h2>Update</h2>
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    props.onUpdate(title, body);
+                }}
+            >
+                <input
+                    type="text"
+                    name="title"
+                    value={title}
+                    onChange={(e) => {
+                        setTitle(e.target.value);
+                    }}
+                />
+                <br />
+                <textarea
+                    name="body"
+                    value={body}
+                    onChange={(e) => {
+                        setBody(e.target.value);
+                    }}
+                />
+                <br />
+                <input type="submit" value="Update" />
+            </form>
+        </article>
+    );
+}
+
 function App() {
     const [mode, setMode] = useState("WELCOME");
     const [id, setId] = useState(null);
-    const topics = [
+    const [topics, setTopics] = useState([
         { id: "html", title: "html", body: "html is ..." },
         { id: "css", title: "css", body: "css is ..." },
         { id: "js", title: "js", body: "js is ..." },
-    ];
+    ]);
+
     let contents = null;
+    let contextControl = null;
     if (mode === "WELCOME") {
         contents = <Article title="Welcome" body="Hello, WEB" />;
     } else if (mode === "READ") {
@@ -66,7 +124,51 @@ function App() {
             return item.id === id;
         });
         contents = <Article title={item.title} body={item.body} />;
+        contextControl = (
+            <li>
+                <a
+                    href={"/update/" + id}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        setMode("UPDATE");
+                    }}
+                >
+                    Update
+                </a>
+            </li>
+        );
+    } else if (mode === "CREATE") {
+        contents = (
+            <CreateForm
+                onCreate={(title, body) => {
+                    const newTopics = [...topics];
+                    const newTopic = { id: title, title: title, body: body };
+                    newTopics.push(newTopic);
+                    setTopics(newTopics);
+                    setMode("READ");
+                    setId(newTopic.id);
+                }}
+            />
+        );
+    } else if (mode === "UPDATE") {
+        const newTopics = [...topics];
+        const item = newTopics.find((item) => {
+            return item.id === id;
+        });
+        contents = (
+            <UpdateForm
+                title={item.title}
+                body={item.body}
+                onUpdate={(title, body) => {
+                    item.title = title;
+                    item.body = body;
+                    setTopics(newTopics);
+                    setMode("READ");
+                }}
+            />
+        );
     }
+
     return (
         <div>
             <Header
@@ -83,6 +185,20 @@ function App() {
                 }}
             />
             {contents}
+            <ul>
+                <li>
+                    <a
+                        href="/create"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            setMode("CREATE");
+                        }}
+                    >
+                        Create
+                    </a>
+                </li>
+                {contextControl}
+            </ul>
         </div>
     );
 }
