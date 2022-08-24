@@ -1,6 +1,6 @@
 import logo from "./logo.svg";
 import "./App.css";
-import { useState } from "react";
+import React, { useState } from "react";
 
 function Header(props) {
     return (
@@ -125,17 +125,32 @@ function App() {
         });
         contents = <Article title={item.title} body={item.body} />;
         contextControl = (
-            <li>
-                <a
-                    href={"/update/" + id}
-                    onClick={(e) => {
-                        e.preventDefault();
-                        setMode("UPDATE");
-                    }}
-                >
-                    Update
-                </a>
-            </li>
+            <React.Fragment>
+                <li>
+                    <a
+                        href={"/update/" + id}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            setMode("UPDATE");
+                        }}
+                    >
+                        Update
+                    </a>
+                </li>
+                <li>
+                    <input
+                        type="button"
+                        value="Delete"
+                        onClick={() => {
+                            const newTopics = [...topics].filter((item) => {
+                                return item.id !== id;
+                            });
+                            setTopics(newTopics);
+                            setMode("WELCOME");
+                        }}
+                    />
+                </li>
+            </React.Fragment>
         );
     } else if (mode === "CREATE") {
         contents = (
